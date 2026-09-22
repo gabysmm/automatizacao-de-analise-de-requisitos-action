@@ -1,0 +1,23 @@
+secoes_obrigatorias:
+  - História de usuário
+  - Critérios de aceitação
+
+termos_ambiguos:
+  - rápido
+  - fácil
+  - intuitivo
+  - adequado
+  - eficiente
+
+regras:
+  - id: DOC-001
+    tipo: secao_obrigatoria
+    severidade: critica
+    mensagem: "O documento não contém uma seção obrigatória."
+    correcao: "Inclua a seção exigida e descreva seu conteúdo."
+
+  - id: REQ-001
+    tipo: termos_ambiguos
+    severidade: media
+    mensagem: "O documento possui termos ambíguos que podem gerar interpretação subjetiva."
+    correcao: "Substitua por uma métrica, limite, condição ou critério de aceitação."
