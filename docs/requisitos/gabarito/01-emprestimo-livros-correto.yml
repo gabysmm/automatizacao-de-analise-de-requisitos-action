@@ -1,0 +1,8 @@
+documento: 01-emprestimo-livros-correto.md
+cenario: correto
+modulo: Empréstimo de livros
+hus: [HU-01, HU-02, HU-03]
+
+# [Documento de controle] 
+# nenhum problema é esperado aqui e qualquer ocorrência apontada pela ferramenta é falso positivo
+ocorrencias: []

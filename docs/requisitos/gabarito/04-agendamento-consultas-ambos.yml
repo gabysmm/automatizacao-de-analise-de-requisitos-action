@@ -1,0 +1,45 @@
+documento: 04-agendamento-consultas-ambos.md
+cenario: ambos
+modulo: Agendamento de consultas
+hus: [HU-01, HU-02, HU-03]
+
+ocorrencias:
+  - id: 04-01
+    regra: REQ-001
+    tipo: termos_ambiguos
+    hu: HU-01
+    secao: Critérios de aceitação
+    linha: 13
+    termo: eficiente
+    no_dicionario: true
+    justificativa: "O que seria eficiente? não define isso. Detalhar. Uma dica é detalhar que campos utiliza pra essa bucas (nome, especialidade) e o tempo de resposta."
+
+  - id: 04-02
+    regra: REQ-001
+    tipo: termos_ambiguos
+    hu: HU-01
+    secao: Critérios de aceitação
+    linha: 14
+    termo: adequado
+    no_dicionario: true
+    justificativa: "O que seria adequado? Não diz o que torna o calendário adequado (visão por dia, semana, filtro por médico)."
+
+  - id: 04-03
+    regra: REQ-001
+    tipo: termos_ambiguos
+    hu: HU-02
+    secao: História de usuário
+    linha: 22
+    termo: rápido
+    no_dicionario: true
+    justificativa: "O que definiria como rápido? aberto a interpretação. Detalhar isso ou definindo prazo ou colocando número de passos para cancelar."
+
+  - id: 04-04
+    regra: DOC-001
+    tipo: secao_obrigatoria
+    hu: HU-02
+    secao: Critérios de aceitação
+    linha: 18
+    justificativa: "Possui apenas a história de usuário, sem critérios de aceitação. Adicionar critérios de aceitação da HU"
+
+# HU-03 está correta.

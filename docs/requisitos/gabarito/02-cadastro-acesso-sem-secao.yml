@@ -1,0 +1,23 @@
+documento: 02-cadastro-acesso-sem-secao.md
+cenario: sem_secao_obrigatoria
+modulo: Cadastro e acesso de usuários
+hus: [HU-01, HU-02, HU-03]
+
+ocorrencias:
+  - id: 02-01
+    regra: DOC-001
+    tipo: secao_obrigatoria
+    hu: HU-02
+    secao: Critérios de aceitação
+    linha: 18 
+    justificativa: "A HU-02 tem a história, mas não possui os critérios de aceitação."
+
+  - id: 02-02
+    regra: DOC-001
+    tipo: secao_obrigatoria
+    hu: HU-03
+    secao: História de usuário
+    linha: 24
+    justificativa: "A HU-03 tem só critérios de aceitação sem a história de usuário como base."
+
+# HU 01 tem todas as seções, verificar se passa na analise por causa dela mesmo os outros estando em alerta
