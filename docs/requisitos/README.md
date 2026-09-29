@@ -47,6 +47,7 @@ Um arquivo por documento, com uma entrada por **ocorrência** de problema:
 |---|---|
 | `id` | identificador da ocorrência (`<doc>-<nº>`) |
 | `regra` | id da regra em `brain/regras-teste.yml` (DOC-001, REQ-001) |
+| `categoria` | categoria do problema (`ambiguidade`, `incompletude`, ...), igual à da regra |
 | `hu` | em qual HU está o problema |
 | `secao` | seção onde está o termo, ou qual seção está faltando |
 | `linha` | indica a linha que está o erro |
@@ -56,11 +57,15 @@ Um arquivo por documento, com uma entrada por **ocorrência** de problema:
 
 ## Comparar a saída da ferramenta com o gabarito
 
-Uma ocorrência apontada pela ferramenta é um **acerto** quando bate com uma
+Um achado apontado pela ferramenta é um **acerto** quando bate com uma
 entrada do gabarito em `documento` + `hu` + `regra` e mais:
 
-- `termo`, para REQ-001 (uma HU pode ter mais de um termo ambíguo);
+- `linha`, para REQ-001 (uma HU pode ter mais de um termo ambíguo na mesma seção, e a linha desempata);
 - `secao`, para DOC-001 (indica qual seção está faltando).
+
+O campo `termo` do gabarito é só informativo (documenta qual termo é o problema) e não é
+usado na comparação. Na saída da ferramenta, o termo aparece apenas no texto da `mensagem`.
+O formato da saída está descrito em [Formato de um achado](../../README.md#formato-de-um-achado).
 
 Cada apontamento é então classificado como:
 

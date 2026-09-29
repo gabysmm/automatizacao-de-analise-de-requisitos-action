@@ -9,6 +9,7 @@ ocorrencias:
   - id: 03-01
     regra: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     hu: HU-01
     secao: História de usuário
     linha: 9
@@ -19,6 +20,7 @@ ocorrencias:
   - id: 03-02
     regra: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     hu: HU-01
     secao: Critérios de aceitação
     linha: 14
@@ -29,6 +31,7 @@ ocorrencias:
   - id: 03-03
     regra: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     hu: HU-02
     secao: Critérios de aceitação
     linha: 25
@@ -39,6 +42,7 @@ ocorrencias:
   - id: 03-04
     regra: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     hu: HU-02
     secao: Critérios de aceitação
     linha: 28

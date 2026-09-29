@@ -1,17 +1,19 @@
 regras:
   - id: DOC-001
     tipo: secao_obrigatoria
+    categoria: incompletude
     severidade: critica
     parametros:
       escopo: hu          
       secoes:
         - História de usuário
         - Critérios de aceitação
-    mensagem: "A história de usuário não contém uma seção obrigatória."
+    mensagem: "A história de usuário não contém a seção obrigatória '{secao}'."
     correcao: "Inclua a seção exigida e descreva seu conteúdo."
 
   - id: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     severidade: media
     parametros:
       termos:
@@ -20,5 +22,5 @@ regras:
         - intuitivo
         - adequado
         - eficiente
-    mensagem: "O requisito possui termos ambíguos que podem gerar interpretação subjetiva."
+    mensagem: "O termo '{termo}' é ambíguo e pode gerar interpretação subjetiva."
     correcao: "Substitua por uma métrica, limite, condição ou critério de aceitação. Ou seja, detalhe."
