@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "docs/requisitos/**.md"
+      - "brain/**"
   workflow_dispatch:
 
 jobs:
@@ -27,6 +28,9 @@ jobs:
 
       - name: Gerar relatório
         run: python scripts/gerar_relatorio.py saida/resultado.json
+
+      - name: Verificar achados
+        run: python scripts/verificar_achados.py saida/resultado.json
 
       - name: Salvar resultado da análise
         if: always()
