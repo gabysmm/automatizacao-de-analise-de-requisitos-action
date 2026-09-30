@@ -65,7 +65,6 @@ entrada do gabarito em `documento` + `hu` + `regra` e mais:
 
 O campo `termo` do gabarito é só informativo (documenta qual termo é o problema) e não é
 usado na comparação. Na saída da ferramenta, o termo aparece apenas no texto da `mensagem`.
-O formato da saída está descrito em [Formato de um achado](../../README.md#formato-de-um-achado).
 
 Cada apontamento é então classificado como:
 
