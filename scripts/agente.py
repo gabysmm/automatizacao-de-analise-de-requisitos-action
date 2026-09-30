@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 import yaml
+from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 from analisar_documentos import separar_hus
 from carregar_contexto import REGRAS, REQUISITOS, carregar_documentos, carregar_regras
@@ -98,6 +99,7 @@ def ler_argumentos() -> argparse.Namespace:
 
 def main() -> int:
     args = ler_argumentos()
+    load_dotenv(override=False)
     chave = os.environ.get("LLM_API_KEY")
     if not chave:
         print("Erro: defina a variável de ambiente LLM_API_KEY.", file=sys.stderr)
