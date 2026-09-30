@@ -1,0 +1,53 @@
+documento: 03-carrinho-compras-ambiguo.md
+cenario: termos_ambiguos
+modulo: Carrinho de compras
+hus: [HU-01, HU-02, HU-03]
+
+# no_dicionario: true  --> basicamente o termo está em brain/regras-teste.yml (as regras devem achar)
+# no_dicionario: false --> é ambíguo, mas não está na lista (usar isso mais tarde pra comparar no futuro com oq a llm encontrar)
+ocorrencias:
+  - id: 03-01
+    regra: REQ-001
+    tipo: termos_ambiguos
+    categoria: ambiguidade
+    hu: HU-01
+    secao: História de usuário
+    linha: 9
+    termo: simples
+    no_dicionario: false
+    justificativa: "'De forma simples' o que seria simples nesse caso? chegar a um concenso sobre o simples e detalhar."
+
+  - id: 03-02
+    regra: REQ-001
+    tipo: termos_ambiguos
+    categoria: ambiguidade
+    hu: HU-01
+    secao: Critérios de aceitação
+    linha: 14
+    termo: rápido
+    no_dicionario: true
+    justificativa: "O que seria rápido? Não define o tempo. Detalhar para definir (ex.: em até 2 segundos)."
+
+  - id: 03-03
+    regra: REQ-001
+    tipo: termos_ambiguos
+    categoria: ambiguidade
+    hu: HU-02
+    secao: Critérios de aceitação
+    linha: 25
+    termo: intuitivo
+    no_dicionario: true
+    justificativa: "Intuitivo é um critério subjetivo. O que define como intuitivo? não dá para testar se passou ou falhou. Detalhar mais o critério."
+
+  - id: 03-04
+    regra: REQ-001
+    tipo: termos_ambiguos
+    categoria: ambiguidade
+    hu: HU-02
+    secao: Critérios de aceitação
+    linha: 28
+    termo: fácil
+    no_dicionario: true
+    justificativa: "O que define ser fácil? Não diz como remover (botão, quantidade zero) nem quantos passos."
+
+# HU-03 está correta e apontar algo nela é falso positivo

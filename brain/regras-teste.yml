@@ -1,23 +1,26 @@
-secoes_obrigatorias:
-  - História de usuário
-  - Critérios de aceitação
-
-termos_ambiguos:
-  - rápido
-  - fácil
-  - intuitivo
-  - adequado
-  - eficiente
-
 regras:
   - id: DOC-001
     tipo: secao_obrigatoria
+    categoria: incompletude
     severidade: critica
-    mensagem: "O documento não contém uma seção obrigatória."
+    parametros:
+      escopo: hu          
+      secoes:
+        - História de usuário
+        - Critérios de aceitação
+    mensagem: "A história de usuário não contém a seção obrigatória '{secao}'."
     correcao: "Inclua a seção exigida e descreva seu conteúdo."
 
   - id: REQ-001
     tipo: termos_ambiguos
+    categoria: ambiguidade
     severidade: media
-    mensagem: "O documento possui termos ambíguos que podem gerar interpretação subjetiva."
-    correcao: "Substitua por uma métrica, limite, condição ou critério de aceitação."
+    parametros:
+      termos:
+        - rápido
+        - fácil
+        - intuitivo
+        - adequado
+        - eficiente
+    mensagem: "O termo '{termo}' é ambíguo e pode gerar interpretação subjetiva."
+    correcao: "Substitua por uma métrica, limite, condição ou critério de aceitação. Ou seja, detalhe."

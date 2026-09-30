@@ -1,10 +1,14 @@
 name: Análise de requisitos
 
 on:
-    workflow_dispatch:
+  push:
+    paths:
+      - "docs/requisitos/**.md"
+      - "brain/**"
+  workflow_dispatch:
 
 jobs:
-  preparar-ambiente:
+  analisar-requisitos:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,6 +19,23 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-    
+
       - name: Instalar dependências
         run: python -m pip install -r requirements.txt
+
+      - name: Analisar documentos
+        run: python scripts/analisar_documentos.py --saida saida/resultado.json
+
+      - name: Gerar relatório
+        run: python scripts/gerar_relatorio.py saida/resultado.json
+
+      - name: Verificar achados
+        run: python scripts/verificar_achados.py saida/resultado.json
+
+      - name: Salvar resultado da análise
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: resultado-analise
+          path: saida/resultado.json
+          if-no-files-found: warn
