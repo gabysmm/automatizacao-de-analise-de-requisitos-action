@@ -12,8 +12,8 @@ from analisar_documentos import separar_hus
 from carregar_contexto import REGRAS, REQUISITOS, carregar_documentos, carregar_regras
 from prompt import ESQUEMA_RESPOSTA, VERSAO_PROMPT, montar_mensagens
 
-MODELO_PADRAO = "gemini-3.8-flash"
-URL_BASE_PADRAO = "https://generativelanguage.googleapis.com/v1beta/openai/"
+MODELO_PADRAO = "openai/gpt-oss-120b"
+URL_BASE_PADRAO = "https://api.groq.com/openai/v1"
 CAMPOS_TEXTO = ("regra", "hu", "secao", "trecho", "mensagem", "correcao")
 
 def chamar_llm(cliente: OpenAI, modelo: str, mensagens: list[dict]) -> dict:
