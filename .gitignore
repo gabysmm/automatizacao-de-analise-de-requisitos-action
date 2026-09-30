@@ -1,5 +1,3 @@
-# Saída gerada a cada execução da análise (não é código)
 saida/
-
-# Cache gerado automaticamente pelo Python
 __pycache__/
+.env
