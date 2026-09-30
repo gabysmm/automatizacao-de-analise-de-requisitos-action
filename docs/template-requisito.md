@@ -1,6 +1,8 @@
-# [Título curto do requisito]
+# Módulo: [Nome do módulo ou funcionalidade]
 
-## História de usuário
+## HU-01 — [Título curto da história]
+
+### História de usuário
 
 <!--Descreve QUEM precisa, O QUE precisa e POR QUE precisa, no formato:
   Como [usuário/stakeholder afetado], quero [ação ou funcionalidade], para [benefício ou objetivo].
@@ -11,7 +13,7 @@ Exemplo:
 
 Como [tipo de usuário], quero [ação ou funcionalidade], para [benefício ou objetivo].
 
-## Critérios de aceitação
+### Critérios de aceitação
 
 <!-- Lista as condições que precisam ser verdadeiras para considerar a história pronta. Usa um critério por item, no formato:
 
