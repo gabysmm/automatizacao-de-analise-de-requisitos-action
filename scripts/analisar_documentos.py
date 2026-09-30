@@ -6,7 +6,7 @@ import unicodedata
 from datetime import datetime
 from pathlib import Path
 import yaml
-from carregar_contexto import (REGRAS_PADRAO, REQUISITOS_PADRAO, carregar_documentos, carregar_regras)
+from carregar_contexto import (REGRAS, REQUISITOS, carregar_documentos, carregar_regras)
 
 PADRAO_HU = re.compile(r"^##\s+(HU-\d+)\b")
 PADRAO_SECAO = re.compile(r"^###\s+(.+?)\s*$")
@@ -140,10 +140,10 @@ def analisar(regras: list[dict], documentos: list[dict]) -> list[dict]:
 
 def ler_argumentos() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analisa requisitos aplicando as regras.")
-    parser.add_argument("--regras", default=REGRAS_PADRAO,
-                        help=f"arquivo YAML de regras (padrão: {REGRAS_PADRAO})")
-    parser.add_argument("--requisitos", default=REQUISITOS_PADRAO,
-                        help=f"pasta com os .md de requisitos (padrão: {REQUISITOS_PADRAO})")
+    parser.add_argument("--regras", default=REGRAS,
+                        help=f"arquivo YAML de regras (padrão: {REGRAS})")
+    parser.add_argument("--requisitos", default=REQUISITOS,
+                        help=f"pasta com os .md de requisitos (padrão: {REQUISITOS})")
     parser.add_argument("--saida",
                         help="arquivo JSON de saída; se omitido, imprime na tela")
     return parser.parse_args()
