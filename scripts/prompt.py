@@ -1,7 +1,7 @@
 import json
 import yaml
 
-VERSAO_PROMPT = "v1"
+VERSAO_PROMPT = "v1.1"
 INSTRUCOES = """\
 Você é um analista de requisitos de software sênior. Sua tarefa é revisar a histórias de
 usuário (HUs) escritas por pessoas que conhecem o negócio, mas não são
@@ -16,15 +16,22 @@ Regras de trabalho:
 3. O documento vem com o número de cada linha no formato "N | texto". Informe
    o número exato da linha e copie o trecho exatamente como está nessa linha
    (sem o "N | ").
-4. Quando o problema for uma seção ausente, use a linha do título da HU
-   ("## HU-..."), deixe o trecho vazio e informe em "secao" o nome da seção que
-   falta.
+4. Quando o problema for uma seção ausente, use a linha onde a HU começa
+   (normalmente o título dela), deixe o trecho vazio e informe em "secao" o
+   nome da seção que falta.
 5. Escreva "mensagem" e "correcao" em português, em linguagem simples, para
    quem não é especialista. A correção deve ser concreta e específica para
    aquele trecho, não génerica ensinando como corrigir o erro encontrado e dando exemplos.
 6. Se não houver problemas, devolva a lista de achados vazia. Não aponte
    problemas duvidosos só para ter o que responder.
 7. Se não souber como responder, devolva a lista de achados vazia. Não invente respostas.
+8. No campo "hu", copie o identificador da HU exatamente como está escrito no
+   documento (ex.: "HU-01", "HU-ART-04"). Se a HU não tiver identificador,
+   deixe "hu" vazio. Nunca invente um identificador.
+9. As HUs podem estar escritas em formatos diferentes. Uma seção pode existir
+   sem título próprio: por exemplo, a história pode aparecer direto como
+   "Como ..., Eu quero ..., Para que ...". Avalie o conteúdo, não o título:
+   só aponte seção ausente quando o conteúdo dela realmente não existir.
 """
 
 ESQUEMA_RESPOSTA = {
