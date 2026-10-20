@@ -11,7 +11,7 @@ from openai import OpenAI, OpenAIError
 from carregar_contexto import REGRAS, REQUISITOS, carregar_documentos, carregar_regras
 from prompt import ESQUEMA_RESPOSTA, VERSAO_PROMPT, montar_mensagens
 
-MODELO_PADRAO = "openai/gpt-oss-120b"
+MODELO_PADRAO = "qwen/qwen3.8-27b"
 URL_BASE_PADRAO = "https://api.groq.com/openai/v1"
 CAMPOS_TEXTO = ("regra", "hu", "secao", "trecho", "mensagem", "correcao")
 
