@@ -26,7 +26,7 @@ def carregar_documentos(pasta: Path) -> list[dict]:
         raise NotADirectoryError(f"{pasta}: pasta de requisitos não encontrada.")
 
     documentos = []
-    for arquivo in sorted(pasta.glob("*.md")):
+    for arquivo in sorted(pasta.rglob("*.md")):
         if arquivo.name in ARQUIVOS_IGNORADOS:
             continue
         texto = arquivo.read_text(encoding="utf-8")
