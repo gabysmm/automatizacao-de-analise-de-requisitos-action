@@ -62,6 +62,7 @@ def montar_tabela_contagem(titulo: str, contagem: Counter, nomes: dict) -> list[
 def montar_resumo(resultado: dict) -> str:
     execucao = resultado["execucao"]
     achados = resultado["achados"]
+    descartados = resultado.get("descartados") or []
 
     linhas = [
         "## Relatório de análise de requisitos",
@@ -70,9 +71,16 @@ def montar_resumo(resultado: dict) -> str:
         f"**Data:** {formatar_data(execucao.get('data'))} · "
         f"**Achados:** {len(achados)}",
     ]
-
+    if descartados:
+        linhas += ["", f"⚠️ **{len(descartados)} achado(s) descartado(s) pela validação.** "
+                       "A IA apontou problemas que não puderam ser confirmados no documento "
+                       "(por exemplo, linha ou trecho inexistente). Veja os avisos na página "
+                       "da execução e revise esses pontos manualmente."]
     if not achados:
-        linhas += ["", "✅ Nenhum problema encontrado."]
+        if descartados:
+            linhas += ["", "Nenhum achado foi confirmado."]
+        else:
+            linhas += ["", "✅ Nenhum problema encontrado."]
         return "\n".join(linhas)
 
     linhas.append("")
@@ -97,7 +105,7 @@ def montar_secao_documento(documento: str, achados: list[dict]) -> str:
     for achado in achados:
         linhas.append(
             f"| {escapar(achado.get('linha'))} "
-            f"| {escapar(achado.get('hu'))} "
+            f"| {escapar(achado.get('hu')) or '—'} "
             f"| {escapar(achado.get('secao'))} "
             f"| {escapar(achado.get('regra'))} "
             f"| {escapar(nome_exibicao(achado.get('severidade'), SEVERIDADES))} "
