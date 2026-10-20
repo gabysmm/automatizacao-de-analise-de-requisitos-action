@@ -6,11 +6,8 @@ import unicodedata
 from datetime import datetime
 from pathlib import Path
 import yaml
-from carregar_contexto import (REGRAS, REQUISITOS, carregar_documentos, carregar_regras)
+from carregar_contexto import (REGRAS, REQUISITOS, carregar_documentos, carregar_regras, separar_hus)
 
-PADRAO_HU = re.compile(r"^##\s+(HU-\d+)\b")
-PADRAO_SECAO = re.compile(r"^###\s+(.+?)\s*$")
-PADRAO_TITULO = re.compile(r"^#{1,6}\s")
 PADRAO_PALAVRA = re.compile(r"\w+")
 
 def normalizar(texto: str) -> str:
@@ -34,34 +31,6 @@ def gerar_variacoes(termo: str) -> set[str]:
     elif not t.endswith("s"):
         variacoes.add(t + "s")                 # eficiente -> eficientes
     return variacoes
-
-def separar_hus(documento: dict) -> list[dict]:
-    hus = []
-    hu_atual = None
-    secao_atual = None
-
-    for numero, linha in enumerate(documento["linhas"], start=1):
-        encontrou_hu = PADRAO_HU.match(linha)
-        if encontrou_hu:
-            hu_atual = {"id": encontrou_hu.group(1), "linha": numero, "secoes": []}
-            hus.append(hu_atual)
-            secao_atual = None
-            continue
-
-        encontrou_secao = PADRAO_SECAO.match(linha)
-        if encontrou_secao and hu_atual is not None:
-            secao_atual = {"nome": encontrou_secao.group(1), "linha": numero, "conteudo": []}
-            hu_atual["secoes"].append(secao_atual)
-            continue
-
-        if PADRAO_TITULO.match(linha):
-            secao_atual = None
-            continue
-
-        if secao_atual is not None and linha.strip():
-            secao_atual["conteudo"].append((numero, linha))
-
-    return hus
 
 def criar_achado(regra: dict, documento: dict, hu: dict, nome_secao: str,
                  linha: int, trecho: str, **marcadores) -> dict:

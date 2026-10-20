@@ -8,8 +8,7 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
-from analisar_documentos import separar_hus
-from carregar_contexto import REGRAS, REQUISITOS, carregar_documentos, carregar_regras
+from carregar_contexto import (REGRAS, REQUISITOS, carregar_documentos, carregar_regras, separar_hus)
 from prompt import ESQUEMA_RESPOSTA, VERSAO_PROMPT, montar_mensagens
 
 MODELO_PADRAO = "openai/gpt-oss-120b"
