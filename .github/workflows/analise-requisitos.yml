@@ -24,7 +24,11 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Analisar documentos
-        run: python scripts/analisar_documentos.py --saida saida/resultado.json
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODELO: ${{ vars.LLM_MODELO }}
+          LLM_URL_BASE: ${{ vars.LLM_URL_BASE }}
+        run: python scripts/agente.py --saida saida/resultado.json
 
       - name: Gerar relatório
         run: python scripts/gerar_relatorio.py saida/resultado.json

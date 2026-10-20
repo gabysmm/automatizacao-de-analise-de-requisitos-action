@@ -1,4 +1,5 @@
 import argparse
+import re
 import sys
 from pathlib import Path
 import yaml
@@ -6,6 +7,10 @@ import yaml
 REGRAS = "brain/regras-teste.yml"
 REQUISITOS = "docs/requisitos"
 ARQUIVOS_IGNORADOS = {"README.md"}
+# Estrutura esperada do documento: "## HU-NN" abre uma HU e "### Nome" abre uma seção.
+PADRAO_HU = re.compile(r"^##\s+(HU-\d+)\b")
+PADRAO_SECAO = re.compile(r"^###\s+(.+?)\s*$")
+PADRAO_TITULO = re.compile(r"^#{1,6}\s")
 
 def carregar_regras(caminho: Path) -> list[dict]:
     with caminho.open(encoding="utf-8") as arquivo:
@@ -31,6 +36,34 @@ def carregar_documentos(pasta: Path) -> list[dict]:
         })
 
     return documentos
+
+def separar_hus(documento: dict) -> list[dict]:
+    hus = []
+    hu_atual = None
+    secao_atual = None
+
+    for numero, linha in enumerate(documento["linhas"], start=1):
+        encontrou_hu = PADRAO_HU.match(linha)
+        if encontrou_hu:
+            hu_atual = {"id": encontrou_hu.group(1), "linha": numero, "secoes": []}
+            hus.append(hu_atual)
+            secao_atual = None
+            continue
+
+        encontrou_secao = PADRAO_SECAO.match(linha)
+        if encontrou_secao and hu_atual is not None:
+            secao_atual = {"nome": encontrou_secao.group(1), "linha": numero, "conteudo": []}
+            hu_atual["secoes"].append(secao_atual)
+            continue
+
+        if PADRAO_TITULO.match(linha):
+            secao_atual = None
+            continue
+
+        if secao_atual is not None and linha.strip():
+            secao_atual["conteudo"].append((numero, linha))
+
+    return hus
 
 def ler_argumentos() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Carrega regras e documentos de requisitos.")
