@@ -4,12 +4,20 @@ regras:
     categoria: incompletude
     severidade: critica
     parametros:
-      escopo: hu          
+      escopo: hu
       secoes:
         - História de usuário
         - Critérios de aceitação
-    mensagem: "A história de usuário não contém a seção obrigatória '{secao}'."
-    correcao: "Inclua a seção exigida e descreva seu conteúdo."
+      como_avaliar: >-
+        Avalie pelo conteúdo, não pelo título. Títulos de seção são opcionais.
+        A história de usuário está presente se a HU tiver o texto no modelo
+        "Como [quem], quero [o quê], para [por quê]" (ou "Como ..., Eu quero ...,
+        Para que ..."), com ou sem um título "História de usuário".
+        Os critérios de aceitação estão presentes se houver condições verificáveis
+        (por exemplo "Dado ..., quando ..., então ..."), com ou sem título.
+        Só aponte este problema quando o conteúdo realmente não existir.
+    mensagem: "Não foi encontrado(a) '{secao}' nesta HU."
+    correcao: "Adicione o conteúdo que falta à HU. A história segue o modelo: Como [quem], quero [o quê], para [por quê]. Os critérios seguem o modelo: Dado [situação], quando [ação], então [resultado]."
 
   - id: REQ-001
     tipo: termos_ambiguos
