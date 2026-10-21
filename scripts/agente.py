@@ -8,26 +8,38 @@ from pathlib import Path
 import yaml
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
-from carregar_contexto import REGRAS, REQUISITOS, carregar_documentos, carregar_regras
-from prompt import ESQUEMA_RESPOSTA, VERSAO_PROMPT, montar_mensagens
+from carregar_contexto import BASE, REQUISITOS, carregar_base, carregar_documentos
+from prompt import VERSAO_PROMPT, montar_esquema, montar_mensagens
 
 MODELO_PADRAO = "openai/gpt-oss-120b"
 URL_BASE_PADRAO = "https://api.groq.com/openai/v1"
 CAMPOS_TEXTO = ("regra", "hu", "secao", "trecho", "mensagem", "correcao")
 
-def chamar_llm(cliente: OpenAI, modelo: str, mensagens: list[dict]) -> dict:
+def contar_tokens(uso) -> dict:
+    if uso is None:
+        return {"entrada": 0, "saida": 0, "cache": 0}
+    detalhes = getattr(uso, "prompt_tokens_details", None)
+    cache = getattr(detalhes, "cached_tokens", None) if detalhes else None
+    return {
+        "entrada": uso.prompt_tokens or 0,
+        "saida": uso.completion_tokens or 0,
+        "cache": cache or 0,
+    }
+
+def chamar_llm(cliente: OpenAI, modelo: str, mensagens: list[dict],
+               esquema: dict) -> tuple[dict, dict]:
     resposta = cliente.chat.completions.create(
         model=modelo,
         messages=mensagens,
         temperature=0,
         response_format={
             "type": "json_schema",
-            "json_schema": {"name": "achados", "schema": ESQUEMA_RESPOSTA},
+            "json_schema": {"name": "achados", "schema": esquema},
         },
     )
     texto = resposta.choices[0].message.content or ""
     texto = re.sub(r"^\s*```(?:json)?\s*|\s*```\s*$", "", texto)
-    return json.loads(texto)
+    return json.loads(texto), contar_tokens(resposta.usage)
 
 def hu_aparece_no_documento(hu: str, texto: str) -> bool:
     padrao = rf"(?<![\w-]){re.escape(hu)}(?![\w-])"
@@ -77,6 +89,7 @@ def validar_achados(resposta: dict, regras: list[dict],
         achados.append({
             "id": None,
             "regra": regra["id"],
+            "nome_regra": regra.get("nome", ""),  # vem da base, não da LLM
             "categoria": regra["categoria"],    # vem da regra, não da LLM
             "severidade": regra["severidade"],  # vem da regra, não da LLM
             "documento": documento["caminho"],
@@ -89,25 +102,31 @@ def validar_achados(resposta: dict, regras: list[dict],
         })
     return achados, descartados
 
-def analisar(cliente: OpenAI, modelo: str, regras: list[dict],
-             documentos: list[dict]) -> tuple[list[dict], list[dict]]:
+def analisar(cliente: OpenAI, modelo: str, base: dict,
+             documentos: list[dict]) -> tuple[list[dict], list[dict], dict]:
     achados, descartados = [], []
+    tokens = {"entrada": 0, "saida": 0, "cache": 0}
+    esquema = montar_esquema(base["regras"])
     for documento in documentos:
         print(f"Analisando {documento['caminho']} com {modelo}...", file=sys.stderr)
-        resposta = chamar_llm(cliente, modelo, montar_mensagens(regras, documento))
-        aceitos, rejeitados = validar_achados(resposta, regras, documento)
+        resposta, uso = chamar_llm(cliente, modelo, montar_mensagens(base, documento), esquema)
+        print(f"  tokens: entrada={uso['entrada']} (cache={uso['cache']}), "
+              f"saída={uso['saida']}", file=sys.stderr)
+        for chave in tokens:
+            tokens[chave] += uso[chave]
+        aceitos, rejeitados = validar_achados(resposta, base["regras"], documento)
         achados.extend(aceitos)
         descartados.extend(rejeitados)
 
     achados.sort(key=lambda a: (a["documento"], a["linha"], a["regra"]))
     for numero, achado in enumerate(achados, start=1):
         achado["id"] = f"A-{numero:03d}"
-    return achados, descartados
+    return achados, descartados, tokens
 
 def ler_argumentos() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Analisa requisitos usando uma LLM.")
-    parser.add_argument("--regras", default=REGRAS,
-                        help=f"arquivo YAML de regras (padrão: {REGRAS})")
+    parser.add_argument("--base", default=BASE,
+                        help=f"pasta da base de conhecimento (padrão: {BASE})")
     parser.add_argument("--requisitos", default=REQUISITOS,
                         help=f"pasta com os .md de requisitos (padrão: {REQUISITOS})")
     parser.add_argument("--saida",
@@ -126,9 +145,9 @@ def main() -> int:
     cliente = OpenAI(api_key=chave, base_url=url_base, max_retries=3)
 
     try:
-        regras = carregar_regras(Path(args.regras))
+        base = carregar_base(Path(args.base))
         documentos = carregar_documentos(Path(args.requisitos))
-        achados, descartados = analisar(cliente, modelo, regras, documentos)
+        achados, descartados, tokens = analisar(cliente, modelo, base, documentos)
     except (OSError, ValueError, KeyError, yaml.YAMLError, OpenAIError) as erro:
         print(f"Erro na análise: {erro}", file=sys.stderr)
         return 1
@@ -139,6 +158,8 @@ def main() -> int:
             "data": datetime.now().astimezone().isoformat(timespec="seconds"),
             "modelo": modelo,
             "versao_prompt": VERSAO_PROMPT,
+            "versao_base": base["versao"],
+            "tokens": tokens,
         },
         "achados": achados,
         "descartados": descartados,
