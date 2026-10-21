@@ -1,18 +1,19 @@
 ---
 categoria: lacuna
-versao: 0.2
+versao: 0.3
 regras:
   LAC-01: { severidade: critica }
   LAC-02: { severidade: critica }
   LAC-03: { severidade: media }
   LAC-04: { severidade: media }
+  LAC-05: { severidade: media }
 ---
 # Lacuna
 
 Informação necessária para entender ou testar a HU que não está escrita.
 A HU deve ser autossuficiente: quem lê não deve precisar adivinhar o que falta.
 Os sinais e exemplos são ilustrativos, não uma lista fechada: interprete o
-texto e aponte o que falta, mesmo com outras palavras, dentro dos quatro
+texto e aponte o que falta, mesmo com outras palavras, dentro dos cinco
 subtipos abaixo. Não crie subtipos novos.
 
 Fronteira: se a informação está escrita, mas permite mais de um sentido, é
@@ -72,3 +73,15 @@ entender o que é pedido ou verificar os critérios da própria HU. Não aponte:
   - o que falta é só a forma técnica (canal, formato, tela) e a HU continua
     verificável sem isso.
 - Orientar: pergunte quem recebe, o que exatamente e onde.
+
+## LAC-05 — Falta o benefício
+- O que é: a história diz quem e o quê, mas não diz para quê.
+- Sinais (exemplos): a história termina na ação, sem "para", "para que" ou
+  outra forma de dizer o objetivo.
+- Com falha: "Como morador, quero ver as encomendas que estão na portaria."
+- Corrigida: "Como morador, quero ver as encomendas que estão na portaria,
+  para buscá-las sem precisar perguntar ao porteiro."
+- Não apontar quando: o objetivo está na história com outras palavras ("...,
+  assim não perco entregas"). Se o benefício existe, mas só repete a ação, é
+  ARMADILHA (ARM-03).
+- Orientar: pergunte o que a pessoa ganha ou resolve com a funcionalidade.
