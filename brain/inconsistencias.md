@@ -1,9 +1,9 @@
 ---
 categoria: inconsistencia
-versao: 0.1
+versao: 0.2
 regras:
-  INC-01: { severidade: alta }
-  INC-02: { severidade: alta }
+  INC-01: { severidade: critica }
+  INC-02: { severidade: critica }
 ---
 # Inconsistência
 
