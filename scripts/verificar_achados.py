@@ -30,16 +30,22 @@ def main() -> int:
     except (OSError, ValueError, json.JSONDecodeError) as erro:
         print(f"Erro ao verificar os achados: {erro}", file=sys.stderr)
         return 1
+    erros = resultado.get("erros") or []
+    for erro in erros:
+        print(f"::error file={erro.get('documento')},title=Arquivo não analisado::{erro.get('motivo')}")
+    if erros:
+        print(f"❌ {len(erros)} arquivo(s) não puderam ser analisados. Veja o relatório.")
 
     falhas = achados_que_falham(resultado["achados"])
-    if not falhas:
+    if not falhas and not erros:
         print("✅ Nenhum achado de severidade média, alta ou crítica.")
         return 0
 
     for achado in falhas:
         anotar_no_github(achado)
-    print(f"❌ {len(falhas)} achado(s) de severidade média, alta ou crítica. "
-          "Corrija os requisitos apontados no relatório.")
+    if falhas:
+        print(f"{len(falhas)} achado(s) de severidade média, alta ou crítica. "
+              "Corrija os requisitos apontados no relatório.")
     return 1
 
 if __name__ == "__main__":

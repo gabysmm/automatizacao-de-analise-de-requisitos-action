@@ -15,10 +15,17 @@ SEVERIDADES = {
 
 CATEGORIAS = {
     "ambiguidade": "ambiguidade",
-    "incompletude": "incompletude",
+    "lacuna": "lacuna",
     "inconsistencia": "inconsistência",
+    "armadilha": "armadilha",
+    "incompletude": "incompletude",
     "verificabilidade": "verificabilidade",
 }
+
+AVISO_IA = ("> **ATENÇÃO: Esta análise é feita por inteligência artificial e pode errar.** "
+            "Ela pode apontar algo que não é um problema ou deixar passar um problema real. "
+            "Leia cada apontamento e a orientação, e decida se faz sentido "
+            "antes de mudar a sua história de usuário.")
 
 def ler_argumentos() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Gera o relatório em Markdown a partir do JSON de achados.")
@@ -63,6 +70,7 @@ def montar_resumo(resultado: dict) -> str:
     execucao = resultado["execucao"]
     achados = resultado["achados"]
     descartados = resultado.get("descartados") or []
+    erros = resultado.get("erros") or []
 
     linhas = [
         "## Relatório de análise de requisitos",
@@ -71,13 +79,18 @@ def montar_resumo(resultado: dict) -> str:
         f"**Data:** {formatar_data(execucao.get('data'))} · "
         f"**Achados:** {len(achados)}",
     ]
+    if execucao.get("metodo") == "llm":
+        linhas += ["", AVISO_IA]
+    if erros:
+        linhas += ["", f"❌ **{len(erros)} arquivo(s) não puderam ser analisados:**", ""]
+        linhas += [f"- `{escapar(e.get('documento'))}`: {escapar(e.get('motivo'))}" for e in erros]
     if descartados:
         linhas += ["", f"⚠️ **{len(descartados)} achado(s) descartado(s) pela validação.** "
                        "A IA apontou problemas que não puderam ser confirmados no documento "
                        "(por exemplo, linha ou trecho inexistente). Veja os avisos na página "
                        "da execução e revise esses pontos manualmente."]
     if not achados:
-        if descartados:
+        if descartados or erros:
             linhas += ["", "Nenhum achado foi confirmado."]
         else:
             linhas += ["", "✅ Nenhum problema encontrado."]
@@ -103,11 +116,14 @@ def montar_secao_documento(documento: str, achados: list[dict]) -> str:
         "|---|---|---|---|---|---|---|",
     ]
     for achado in achados:
+        regra = escapar(achado.get("regra"))
+        if achado.get("nome_regra"):
+            regra += f" — {escapar(achado['nome_regra'])}"
         linhas.append(
             f"| {escapar(achado.get('linha'))} "
             f"| {escapar(achado.get('hu')) or '—'} "
             f"| {escapar(achado.get('secao'))} "
-            f"| {escapar(achado.get('regra'))} "
+            f"| {regra} "
             f"| {escapar(nome_exibicao(achado.get('severidade'), SEVERIDADES))} "
             f"| {escapar(achado.get('mensagem'))} "
             f"| {escapar(achado.get('correcao'))} |"

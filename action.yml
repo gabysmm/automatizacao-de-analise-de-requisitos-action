@@ -1,6 +1,6 @@
 #   uses: gabysmm/automatizacao-de-analise-de-requisitos-action@v2
 name: "Análise de requisitos com LLM"
-description: "Analisa histórias de usuário em Markdown com uma LLM, aponta problemas de qualidade (ambiguidade, incompletude...) e sugere correções."
+description: "Analisa histórias de usuário em Markdown com uma LLM, aponta falhas de qualidade (ambiguidade, lacuna, inconsistência e armadilha) e sugere correções."
 author: "gabysmm"
 
 inputs:
@@ -56,7 +56,7 @@ runs:
         RESULTADO: ${{ steps.preparar.outputs.resultado }}
       run: |
         "$VENV/bin/python" "$GITHUB_ACTION_PATH/scripts/agente.py" \
-          --regras "$GITHUB_ACTION_PATH/brain/regras-teste.yml" \
+          --base "$GITHUB_ACTION_PATH/brain" \
           --requisitos "$PASTA_HUS" \
           --saida "$RESULTADO"
 

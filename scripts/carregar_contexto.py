@@ -1,13 +1,26 @@
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
 import yaml
 
 REGRAS = "brain/regras-teste.yml"
+BASE = "brain"
 REQUISITOS = "docs/requisitos"
 ARQUIVOS_IGNORADOS = {"README.md"}
-# Estrutura esperada do documento: "## HU-NN" abre uma HU e "### Nome" abre uma seção.
+
+ORDEM_BASE = (
+    "historias-de-usuario.md",
+    "ambiguidade.md",
+    "lacunas.md",
+    "inconsistencias.md",
+    "armadilhas.md",
+)
+SEVERIDADES_VALIDAS = {"critica", "alta", "media", "baixa"}
+PADRAO_CABECALHO = re.compile(r"\A---[ \t]*\n(.*?)\n---[ \t]*\n", re.DOTALL)
+PADRAO_TITULO_REGRA = re.compile(r"^##\s+([A-Z]{3}-\d{2})\s+—\s+(.+?)\s*$", re.MULTILINE)
+
 PADRAO_HU = re.compile(r"^##\s+(HU-\d+)\b")
 PADRAO_SECAO = re.compile(r"^###\s+(.+?)\s*$")
 PADRAO_TITULO = re.compile(r"^#{1,6}\s")
@@ -20,6 +33,57 @@ def carregar_regras(caminho: Path) -> list[dict]:
         raise ValueError(f"{caminho}: o arquivo deve ter uma chave 'regras' com uma lista.")
 
     return dados["regras"]
+
+def separar_cabecalho(texto: str, caminho: Path) -> tuple[dict, str]:
+    encontrou = PADRAO_CABECALHO.match(texto)
+    if not encontrou:
+        raise ValueError(f"{caminho}: o arquivo deve começar com um cabeçalho entre '---'.")
+    cabecalho = yaml.safe_load(encontrou.group(1)) or {}
+    if not isinstance(cabecalho, dict):
+        raise ValueError(f"{caminho}: o cabeçalho deve ser um mapa YAML.")
+    return cabecalho, texto[encontrou.end():].strip()
+
+def carregar_base(pasta: Path) -> dict:
+    partes, regras, versoes = [], [], {}
+    conteudo_bruto = []
+    for nome in ORDEM_BASE:
+        caminho = pasta / nome
+        texto = caminho.read_text(encoding="utf-8")
+        conteudo_bruto.append(texto)
+        cabecalho, corpo = separar_cabecalho(texto, caminho)
+
+        regras_cabecalho = cabecalho.get("regras") or {}
+        titulos = dict(PADRAO_TITULO_REGRA.findall(corpo))
+        if set(regras_cabecalho) != set(titulos):
+            raise ValueError(
+                f"{caminho}: as regras do cabeçalho {sorted(regras_cabecalho)} não batem "
+                f"com os títulos '## ID — nome' do texto {sorted(titulos)}.")
+        if regras_cabecalho and not cabecalho.get("categoria"):
+            raise ValueError(f"{caminho}: arquivo com regras precisa de 'categoria' no cabeçalho.")
+
+        for id_regra, configuracao in regras_cabecalho.items():
+            severidade = (configuracao or {}).get("severidade")
+            if severidade not in SEVERIDADES_VALIDAS:
+                raise ValueError(f"{caminho}: severidade inválida em {id_regra}: {severidade!r}.")
+            regras.append({
+                "id": id_regra,
+                "nome": titulos[id_regra],
+                "categoria": cabecalho["categoria"],
+                "severidade": severidade,
+            })
+        versoes[nome] = str(cabecalho.get("versao", "?"))
+        partes.append(corpo)
+
+    ids = [regra["id"] for regra in regras]
+    if len(ids) != len(set(ids)):
+        raise ValueError(f"{pasta}: há IDs de regra repetidos na base.")
+
+    hash_base = hashlib.sha256("\n".join(conteudo_bruto).encode("utf-8")).hexdigest()[:12]
+    return {
+        "texto": "\n\n".join(partes),
+        "regras": regras,
+        "versao": {"arquivos": versoes, "hash": hash_base},
+    }
 
 def carregar_documentos(pasta: Path) -> list[dict]:
     if not pasta.is_dir():
@@ -71,10 +135,32 @@ def ler_argumentos() -> argparse.Namespace:
                         help=f"arquivo YAML de regras (padrão: {REGRAS})")
     parser.add_argument("--requisitos", default=REQUISITOS,
                         help=f"pasta com os .md de requisitos (padrão: {REQUISITOS})")
+    parser.add_argument("--base",
+                        help="mostra só o catálogo e o tamanho da base de conhecimento "
+                             f"desta pasta (ex.: {BASE})")
     return parser.parse_args()
+
+def mostrar_base(pasta: Path) -> int:
+    try:
+        base = carregar_base(pasta)
+    except (OSError, ValueError, yaml.YAMLError) as erro:
+        print(f"Erro ao carregar a base: {erro}", file=sys.stderr)
+        return 1
+    print(f"== Base de conhecimento — {pasta} (hash {base['versao']['hash']})")
+    for nome, versao in base["versao"]["arquivos"].items():
+        print(f"- {nome} (versão {versao})")
+    print(f"\n== Regras ({len(base['regras'])})")
+    for regra in base["regras"]:
+        print(f"- {regra['id']} — {regra['nome']} "
+              f"[{regra['categoria']}, {regra['severidade']}]")
+    print(f"\nTexto enviado à LLM: {len(base['texto'])} caracteres "
+          f"(~{len(base['texto']) // 4} tokens, estimativa grosseira)")
+    return 0
 
 def main() -> int:
     args = ler_argumentos()
+    if args.base:
+        return mostrar_base(Path(args.base))
 
     try:
         regras = carregar_regras(Path(args.regras))
