@@ -1,6 +1,6 @@
 ---
 categoria: lacuna
-versao: 0.4
+versao: 0.5
 regras:
   LAC-01: { severidade: critica }
   LAC-02: { severidade: critica }
@@ -34,7 +34,9 @@ em outra HU do documento, nem HUs que podem estar em outros arquivos.
 - Corrigida: acrescentar "Dado que o visitante não foi autorizado, quando
   chegar, então o porteiro avisa o morador antes de liberar."
 - Não apontar: a exceção está em outro critério ou HU; a HU não tem condição
-  que possa falhar; a exceção seria técnica (internet, servidor).
+  que possa falhar; a exceção seria técnica (internet, servidor); a própria
+  regra já implica o resultado ("no máximo 2 vezes" implica que a 3ª é
+  recusada) e faltaria só a mensagem ou a tela.
 - Orientar: "e se não der certo?" para cada condição.
 
 ## LAC-04 — Ação incompleta (falta o quê, para quem ou onde)

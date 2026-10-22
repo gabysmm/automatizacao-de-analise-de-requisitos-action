@@ -22,9 +22,9 @@ CATEGORIAS = {
     "verificabilidade": "verificabilidade",
 }
 
-AVISO_IA = ("> ⚠️ **Esta análise é feita por inteligência artificial e pode errar.** "
+AVISO_IA = ("> **ATENÇÃO: Esta análise é feita por inteligência artificial e pode errar.** "
             "Ela pode apontar algo que não é um problema ou deixar passar um problema real. "
-            "Leia cada apontamento, responda à pergunta da sugestão e decida se faz sentido "
+            "Leia cada apontamento e a orientação, e decida se faz sentido "
             "antes de mudar a sua história de usuário.")
 
 def ler_argumentos() -> argparse.Namespace:
@@ -70,6 +70,7 @@ def montar_resumo(resultado: dict) -> str:
     execucao = resultado["execucao"]
     achados = resultado["achados"]
     descartados = resultado.get("descartados") or []
+    erros = resultado.get("erros") or []
 
     linhas = [
         "## Relatório de análise de requisitos",
@@ -80,13 +81,16 @@ def montar_resumo(resultado: dict) -> str:
     ]
     if execucao.get("metodo") == "llm":
         linhas += ["", AVISO_IA]
+    if erros:
+        linhas += ["", f"❌ **{len(erros)} arquivo(s) não puderam ser analisados:**", ""]
+        linhas += [f"- `{escapar(e.get('documento'))}`: {escapar(e.get('motivo'))}" for e in erros]
     if descartados:
         linhas += ["", f"⚠️ **{len(descartados)} achado(s) descartado(s) pela validação.** "
                        "A IA apontou problemas que não puderam ser confirmados no documento "
                        "(por exemplo, linha ou trecho inexistente). Veja os avisos na página "
                        "da execução e revise esses pontos manualmente."]
     if not achados:
-        if descartados:
+        if descartados or erros:
             linhas += ["", "Nenhum achado foi confirmado."]
         else:
             linhas += ["", "✅ Nenhum problema encontrado."]
