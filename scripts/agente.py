@@ -3,6 +3,7 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 import yaml
@@ -16,6 +17,8 @@ URL_BASE_PADRAO = "https://api.groq.com/openai/v1"
 CAMPOS_TEXTO = ("regra", "hu", "secao", "trecho", "mensagem", "correcao")
 PADRAO_MARCADOR = re.compile(r"^(?:[-*•]|\d+[.)])\s+")
 TENTATIVAS = 6 
+LIMITE_TOKENS_MINUTO = int(os.environ.get("LLM_LIMITE_TPM") or 7000)
+ESTIMATIVA_INICIAL = 6000
 
 def contar_tokens(uso) -> dict:
     if uso is None:
@@ -132,12 +135,26 @@ def validar_achados(resposta: dict, regras: list[dict],
         })
     return achados, descartados
 
+def esperar_limite(historico: list[tuple[float, int]], estimativa: int) -> None:
+    while True:
+        agora = time.monotonic()
+        historico[:] = [(t, n) for t, n in historico if agora - t < 60]
+        usados = sum(n for _, n in historico)
+        if not historico or usados + estimativa <= LIMITE_TOKENS_MINUTO:
+            return
+        espera = 60 - (agora - historico[0][0]) + 1
+        print(f"  aguardando {espera:.0f}s para respeitar o limite de tokens por minuto "
+              f"({usados} usados no último minuto)...", file=sys.stderr)
+        time.sleep(espera)
+
 def analisar(cliente: OpenAI, modelo: str, base: dict,
              documentos: list[dict]) -> tuple[list[dict], list[dict], list[dict], dict]:
     achados, descartados, erros = [], [], []
     tokens = {"entrada": 0, "saida": 0, "cache": 0}
     esquema = montar_esquema(base["regras"])
+    historico, estimativa = [], ESTIMATIVA_INICIAL
     for documento in documentos:
+        esperar_limite(historico, estimativa)
         print(f"Analisando {documento['caminho']} com {modelo}...", file=sys.stderr)
         # Um arquivo com erro não interrompe a análise dos outros.
         try:
@@ -146,6 +163,9 @@ def analisar(cliente: OpenAI, modelo: str, base: dict,
                   f"saída={uso['saida']}", file=sys.stderr)
             for chave in tokens:
                 tokens[chave] += uso[chave]
+            gasto = uso["entrada"] - uso["cache"] + uso["saida"]  # cache não conta no limite
+            historico.append((time.monotonic(), gasto))
+            estimativa = max(gasto, 1000)
             aceitos, rejeitados = validar_achados(resposta, base["regras"], documento)
         except (OpenAIError, ValueError) as erro:
             motivo = explicar_erro(erro)
