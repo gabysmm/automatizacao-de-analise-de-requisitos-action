@@ -71,18 +71,39 @@ def trecho_na_linha(trecho: str, linha: str) -> str | None:
         return sem_marcador
     return None
 
+def mensagem_do_provedor(erro: APIStatusError) -> str:
+    if isinstance(corpo, list) and corpo:
+        corpo = corpo[0]
+    if isinstance(corpo, dict):
+        corpo = corpo.get("error", corpo)
+    if isinstance(corpo, dict) and corpo.get("message"):
+        texto = str(corpo["message"])
+    elif corpo:
+        texto = str(corpo)
+    else:
+        try:
+            texto = erro.response.text
+        except Exception:
+            texto = ""
+    return " ".join(texto.split())[:500]
+
 def explicar_erro(erro: Exception) -> str:
-    status = erro.status_code if isinstance(erro, APIStatusError) else None
+    if not isinstance(erro, APIStatusError):
+        return f"Não foi possível analisar este arquivo ({type(erro).__name__}: {erro})."
+    status = erro.status_code
+    detalhe = mensagem_do_provedor(erro)
+    print(f"  resposta do provedor (HTTP {status}): {detalhe or '(vazia)'}", file=sys.stderr)
     if status == 413:
         return ("Arquivo grande demais para o limite gratuito do provedor da IA. "
                 "Divida as HUs em arquivos menores (até 5 ou 6 HUs por arquivo).")
     if status == 429:
         return ("Limite de uso do provedor da IA atingido (por minuto ou por dia), "
                 "mesmo após novas tentativas. Rode a análise de novo mais tarde.")
-    if status in (401, 403) or (status == 400 and "API key" in str(erro)):
+    if status in (401, 403) or (status == 400 and "API key" in detalhe):
         return ("A chave da IA (LLM_API_KEY) foi recusada. Confira se o secret do "
                 "repositório tem uma chave do Gemini (Google AI Studio).")
-    return f"Não foi possível analisar este arquivo ({type(erro).__name__}: {erro})."
+    return (f"Não foi possível analisar este arquivo (erro HTTP {status}). "
+            f"Resposta do provedor: {detalhe or 'sem detalhes'}")
 
 def avisar_erro(documento: dict, motivo: str) -> None:
     print(f"Erro: {documento['caminho']} não foi analisado: {motivo}", file=sys.stderr)
