@@ -72,6 +72,7 @@ def trecho_na_linha(trecho: str, linha: str) -> str | None:
     return None
 
 def mensagem_do_provedor(erro: APIStatusError) -> str:
+    corpo = erro.body
     if isinstance(corpo, list) and corpo:
         corpo = corpo[0]
     if isinstance(corpo, dict):
