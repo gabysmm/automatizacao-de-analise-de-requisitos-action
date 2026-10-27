@@ -5,13 +5,12 @@ author: "gabysmm"
 
 inputs:
   api-key:
-    description: "Chave de API do provedor de LLM. Guarde como secret no seu repositório (ex.: LLM_API_KEY) e passe por aqui."
+    description: "Chave de API do Gemini (gerada no Google AI Studio)."
     required: true
   pasta-hus:
     description: "Pasta com as histórias de usuário (.md), incluindo subpastas. Arquivos README.md são ignorados."
     required: false
     default: "docs/hus"
-
 outputs:
   resultado:
     description: "Caminho do arquivo JSON com os achados da análise."

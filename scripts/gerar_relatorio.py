@@ -72,10 +72,13 @@ def montar_resumo(resultado: dict) -> str:
     descartados = resultado.get("descartados") or []
     erros = resultado.get("erros") or []
 
+    cabecalho = f"**Método:** {execucao.get('metodo', '?')} · "
+    if execucao.get("modelo"):
+        cabecalho += f"**Modelo:** `{escapar(execucao['modelo'])}` · "
     linhas = [
         "## Relatório de análise de requisitos",
         "",
-        f"**Método:** {execucao.get('metodo', '?')} · "
+        cabecalho +
         f"**Data:** {formatar_data(execucao.get('data'))} · "
         f"**Achados:** {len(achados)}",
     ]

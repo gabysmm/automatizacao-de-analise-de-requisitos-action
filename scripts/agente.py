@@ -12,12 +12,12 @@ from openai import APIStatusError, OpenAI, OpenAIError
 from carregar_contexto import BASE, REQUISITOS, carregar_base, carregar_documentos
 from prompt import VERSAO_PROMPT, montar_esquema, montar_mensagens
 
-MODELO_PADRAO = "openai/gpt-oss-120b"
-URL_BASE_PADRAO = "https://api.groq.com/openai/v1"
+MODELO_PADRAO = "gemini-3.8-flash"
+URL_BASE_PADRAO = "https://generativelanguage.googleapis.com/v1beta/openai/"
+LIMITE_TOKENS_MINUTO = int(os.environ["LLM_LIMITE_TPM"]) if os.environ.get("LLM_LIMITE_TPM") else None
 CAMPOS_TEXTO = ("regra", "hu", "secao", "trecho", "mensagem", "correcao")
 PADRAO_MARCADOR = re.compile(r"^(?:[-*•]|\d+[.)])\s+")
-TENTATIVAS = 6 
-LIMITE_TOKENS_MINUTO = int(os.environ.get("LLM_LIMITE_TPM") or 7000)
+TENTATIVAS = 6
 ESTIMATIVA_INICIAL = 6000
 
 def contar_tokens(uso) -> dict:
@@ -36,7 +36,6 @@ def chamar_llm(cliente: OpenAI, modelo: str, mensagens: list[dict],
     resposta = cliente.chat.completions.create(
         model=modelo,
         messages=mensagens,
-        temperature=0,
         response_format={
             "type": "json_schema",
             "json_schema": {"name": "achados", "schema": esquema},
@@ -80,8 +79,9 @@ def explicar_erro(erro: Exception) -> str:
     if status == 429:
         return ("Limite de uso do provedor da IA atingido (por minuto ou por dia), "
                 "mesmo após novas tentativas. Rode a análise de novo mais tarde.")
-    if status in (401, 403):
-        return "A chave da IA (LLM_API_KEY) foi recusada. Confira o secret do repositório."
+    if status in (401, 403) or (status == 400 and "API key" in str(erro)):
+        return ("A chave da IA (LLM_API_KEY) foi recusada. Confira se o secret do "
+                "repositório tem uma chave do Gemini (Google AI Studio).")
     return f"Não foi possível analisar este arquivo ({type(erro).__name__}: {erro})."
 
 def avisar_erro(documento: dict, motivo: str) -> None:
@@ -136,6 +136,8 @@ def validar_achados(resposta: dict, regras: list[dict],
     return achados, descartados
 
 def esperar_limite(historico: list[tuple[float, int]], estimativa: int) -> None:
+    if LIMITE_TOKENS_MINUTO is None:
+        return
     while True:
         agora = time.monotonic()
         historico[:] = [(t, n) for t, n in historico if agora - t < 60]

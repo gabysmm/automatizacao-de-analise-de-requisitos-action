@@ -26,6 +26,10 @@ scripts/ -> codigo das analise
 
 A análise segue a arquitetura de **tubos e filtros**: cada script é uma etapa independente, e elas se comunicam pelo arquivo `saida/resultado.json`.
 
+## Provedor da IA
+
+A análise usa o modelo `gemini-3.8-flash`, do Google. A chave é gerada em aistudio.google.com e guardada no secret `LLM_API_KEY` (localmente, no `.env`; veja `.env.example`).
+
 
 ## Como rodar localmente?
 
